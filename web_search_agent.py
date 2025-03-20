@@ -1,9 +1,12 @@
-import os
+from pydantic import BaseModel, Field
 from typing import Dict, List, Any, TypedDict, Annotated
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, RemoveMessage
 from langgraph.graph import StateGraph, START, END, MessagesState
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_groq import ChatGroq
+from langchain_community.tools.tavily_search import TavilySearchResults
+from langgraph.prebuilt import tools_condition, ToolNode
+
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -11,10 +14,14 @@ load_dotenv()
 class State(MessagesState):
     summary: str
 
-class LangGraphAgent:
+class SearchQuery(BaseModel):
+    search_query: str = Field(None, description="Search query for retrieval.")
+
+
+class WebSearchAgent:
     """A simple LangGraph agent using Ollama LLM."""
     
-    def __init__(self, model_name: str = "llama3-8b-8192"):
+    def __init__(self, model_name: str = "qwen-2.5-32b"):
         """Initialize the LangGraph agent.
         
         Args:
@@ -22,10 +29,12 @@ class LangGraphAgent:
         """
 
         self.model_name = model_name
+        self.tools = [self.search_web]
         self.llm = ChatGroq(
                 groq_api_key=os.environ['GROQ_API_KEY'], 
                 model_name=self.model_name
-        )
+        ).bind_tools(self.tools)
+        
         self.setup_graph()
     
     def setup_graph(self):
@@ -36,15 +45,46 @@ class LangGraphAgent:
         # Add nodes to the graph
         self.workflow.add_node("conversation", self.call_model)
         self.workflow.add_node(self.summarize_conversation)
+        self.workflow.add_node("tools", ToolNode(self.tools))
         
         # Add edges to connect the nodes
         self.workflow.add_edge(START, "conversation")
+        self.workflow.add_conditional_edges("conversation", tools_condition)
+        self.workflow.add_edge("tools", "conversation")
         self.workflow.add_conditional_edges("conversation", self.should_continue)
         self.workflow.add_edge("summarize_conversation", END)
         
         # Compile the graph
         self.memory = MemorySaver()
         self.graph = self.workflow.compile(checkpointer=self.memory)
+    
+    # this is a tool function
+    def search_web(self, query: str) -> str:
+        """ Retrieve additional context and information from web search using the query. 
+        
+        Args: 
+            query: string data type of the search query to retrieve information from.
+        """
+
+        # Search
+        tavily_search = TavilySearchResults(
+            max_results=3, 
+            tavily_api_key=os.environ['TAVILY_API_KEY']
+        )
+
+        search_docs = tavily_search.invoke(query)
+
+        # Format
+        formatted_search_docs = "\n\n---\n\n".join(
+            [
+                f'<Document href="{doc["url"]}"/>\n{doc["content"]}\n</Document>'
+                for doc in search_docs
+            ]
+        )
+
+        return formatted_search_docs    
+    
+    
     
     def call_model(self, state: State) -> State: 
         
@@ -104,6 +144,7 @@ class LangGraphAgent:
         # Otherwise we can just end
         return END
     
+    
     def run(self, task: str, thread_id: str) -> Dict[str, Any]:
         """Run the agent on a given task.
         
@@ -124,6 +165,6 @@ class LangGraphAgent:
 
 if __name__ == "__main__":
     # Example usage
-    agent = LangGraphAgent()
-    result = agent.run("What's the capital of Indonesia.", "1")
+    agent = WebSearchAgent()
+    result = agent.run("What's the latest information about the population of Jakarta as of today?", "1")
     print(result['messages'])

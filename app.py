@@ -1,5 +1,6 @@
 import streamlit as st
-from agent import LangGraphAgent
+from summarized_memory_agent import SummarizedMemoryAgent
+from web_search_agent import WebSearchAgent
 
 class StreamlitApp:
     """A Streamlit application for interacting with the LangGraph agent."""
@@ -22,13 +23,23 @@ class StreamlitApp:
             st.title("Configuration")
             model_name = st.selectbox(
                 "Select Ollama Model",
-                ["llama3-8b-8192", "llama-3.2-1b-preview", "llama-3.2-3b-preview"],
+                ["llama3-8b-8192","llama-3.2-3b-preview", "qwen-2.5-32b"],
+                index=0
+            )
+            # Agent type selection
+            agent_type = st.selectbox(
+                "Select Agent Variant",
+                ["SummarizedMemoryAgent", "WebSearchAgent"], 
                 index=0
             )
             
             if st.button("Initialize Agent"):
                 with st.spinner("Initializing agent..."):
-                    self.agent = LangGraphAgent(model_name=model_name)
+                    if agent_type == "SummarizedMemoryAgent":
+                        self.agent = SummarizedMemoryAgent(model_name=model_name)
+                    elif agent_type == "WebSearchAgent": 
+                        self.agent = WebSearchAgent(model_name=model_name)
+                    
                     st.session_state.agent = self.agent
                     st.success(f"Agent initialized with {model_name} model!")
     
