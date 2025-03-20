@@ -22,7 +22,7 @@ class StreamlitApp:
             st.title("Configuration")
             model_name = st.selectbox(
                 "Select Ollama Model",
-                ["llama3", "llama2", "mistral", "gemma", "phi"],
+                ["llama3-8b-8192", "llama-3.2-1b-preview", "llama-3.2-3b-preview"],
                 index=0
             )
             
@@ -61,22 +61,11 @@ class StreamlitApp:
                     response_container = st.empty()
                     try:
                         # Run the agent
-                        result = st.session_state.agent.run(prompt)
+                        result = st.session_state.agent.run(prompt, "1")
                         
                         # Display the final result
-                        response = result["result"]
+                        response = result["messages"][-1].content
                         response_container.write(response)
-                        
-                        # Show thinking process if requested
-                        with st.expander("See agent's thinking process"):
-                            for msg in result["messages"]:
-                                if hasattr(msg, "type") and hasattr(msg, "content"):
-                                    st.write(f"**{msg.type}**: {msg.content}")
-                                else:
-                                    # Handle different message formats safely
-                                    msg_type = getattr(msg, "type", type(msg).__name__)
-                                    msg_content = getattr(msg, "content", str(msg))
-                                    st.write(f"**{msg_type}**: {msg_content}")
                         
                         # Add assistant message to chat history
                         st.session_state.messages.append({"role": "assistant", "content": response})

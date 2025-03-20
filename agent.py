@@ -6,7 +6,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
 import os
-
+load_dotenv()
 
 class State(MessagesState):
     summary: str
@@ -20,7 +20,6 @@ class LangGraphAgent:
         Args:
             model_name: The name of the Ollama model to use.
         """
-        load_dotenv()
 
         self.model_name = model_name
         self.llm = ChatGroq(
@@ -126,5 +125,5 @@ class LangGraphAgent:
 if __name__ == "__main__":
     # Example usage
     agent = LangGraphAgent()
-    result = agent.run("Explain the concept of quantum computing in simple terms.", "1")
-    print(result["messages"])
+    result = agent.run("What's the capital of Indonesia.", "1")
+    print(result['messages'])
