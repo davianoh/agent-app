@@ -14,10 +14,6 @@ load_dotenv()
 class State(MessagesState):
     summary: str
 
-class SearchQuery(BaseModel):
-    search_query: str = Field(None, description="Search query for retrieval.")
-
-
 class WebSearchAgent:
     """A simple LangGraph agent using Ollama LLM."""
     

@@ -1,6 +1,6 @@
 import streamlit as st
-from summarized_memory_agent import SummarizedMemoryAgent
-from web_search_agent import WebSearchAgent
+from langgraph_agents.summarized_memory_agent import SummarizedMemoryAgent
+from langgraph_agents.web_search_agent import WebSearchAgent
 
 class StreamlitApp:
     """A Streamlit application for interacting with the LangGraph agent."""
