@@ -166,5 +166,5 @@ class WebSearchAgent:
 if __name__ == "__main__":
     # Example usage
     agent = WebSearchAgent()
-    result = agent.run("What's the latest information about the population of Jakarta as of today?", "1")
+    result = agent.run("What's the capital of Indonesia?", "1")
     print(result['messages'])

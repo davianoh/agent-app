@@ -21,25 +21,36 @@ class StreamlitApp:
         """Set up the sidebar with model selection."""
         with st.sidebar:
             st.title("Configuration")
-            model_name = st.selectbox(
-                "Select Ollama Model",
-                ["llama3-8b-8192","llama-3.2-3b-preview", "qwen-2.5-32b"],
-                index=0
-            )
+        
             # Agent type selection
             agent_type = st.selectbox(
                 "Select Agent Variant",
-                ["SummarizedMemoryAgent", "WebSearchAgent"], 
-                index=0
+                ["SummarizedMemoryAgent", "WebSearchAgent"],
+                index=0,
+                key="agent_type"
             )
             
+            # Conditional LLM options based on agent type
+            if agent_type == "SummarizedMemoryAgent":
+                model_options = ["llama3-8b-8192", "llama-3.2-3b-preview"]
+                default_index = 0
+            elif agent_type == "WebSearchAgent":
+                model_options = ["qwen-2.5-32b"]
+                default_index = 0
+            
+            model_name = st.selectbox(
+                "Select LLM Model",
+                model_options,
+                index=default_index
+            )
+        
             if st.button("Initialize Agent"):
                 with st.spinner("Initializing agent..."):
                     if agent_type == "SummarizedMemoryAgent":
                         self.agent = SummarizedMemoryAgent(model_name=model_name)
-                    elif agent_type == "WebSearchAgent": 
+                    elif agent_type == "WebSearchAgent":
                         self.agent = WebSearchAgent(model_name=model_name)
-                    
+                
                     st.session_state.agent = self.agent
                     st.success(f"Agent initialized with {model_name} model!")
     
