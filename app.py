@@ -1,10 +1,6 @@
 import streamlit as st
-from agents.simple_agent import SimpleAgent
-from agents.web_search_agent import WebSearchAgent
-
-from dotenv import load_dotenv
-import os
-load_dotenv()
+from langgraph_agents.summarized_memory_agent import SummarizedMemoryAgent
+from langgraph_agents.web_search_agent import WebSearchAgent
 
 class StreamlitApp:
     """A Streamlit application for interacting with the LangGraph agent."""
@@ -29,13 +25,13 @@ class StreamlitApp:
             # Agent type selection
             agent_type = st.selectbox(
                 "Select Agent Variant",
-                ["SimpleAgent", "WebSearchAgent"],
+                ["SummarizedMemoryAgent", "WebSearchAgent"],
                 index=0,
                 key="agent_type"
             )
             
             # Conditional LLM options based on agent type
-            if agent_type == "SimpleAgent":
+            if agent_type == "SummarizedMemoryAgent":
                 model_options = ["llama3-8b-8192", "llama-3.2-3b-preview"]
                 default_index = 0
             elif agent_type == "WebSearchAgent":
@@ -50,8 +46,8 @@ class StreamlitApp:
         
             if st.button("Initialize Agent"):
                 with st.spinner("Initializing agent..."):
-                    if agent_type == "SimpleAgent":
-                        self.agent = SimpleAgent(model_name=model_name)
+                    if agent_type == "SummarizedMemoryAgent":
+                        self.agent = SummarizedMemoryAgent(model_name=model_name)
                     elif agent_type == "WebSearchAgent":
                         self.agent = WebSearchAgent(model_name=model_name)
                 
