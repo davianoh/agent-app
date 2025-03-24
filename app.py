@@ -1,6 +1,9 @@
 import streamlit as st
 from langgraph_agents.summarized_memory_agent import SummarizedMemoryAgent
 from langgraph_agents.web_search_agent import WebSearchAgent
+import os
+
+# os.environ["LANGCHAIN_PROJECT"] = "groq-agent"
 
 class StreamlitApp:
     """A Streamlit application for interacting with the LangGraph agent."""
@@ -30,7 +33,7 @@ class StreamlitApp:
                 key="agent_type"
             )
             
-            # Conditional LLM options based on agent type
+            # Model options based on agent type
             if agent_type == "SummarizedMemoryAgent":
                 model_options = ["llama3-8b-8192", "llama-3.2-3b-preview"]
                 default_index = 0
@@ -82,14 +85,11 @@ class StreamlitApp:
                 with st.spinner("Thinking..."):
                     response_container = st.empty()
                     try:
-                        # Run the agent
                         result = st.session_state.agent.run(prompt, "1")
                         
-                        # Display the final result
                         response = result["messages"][-1].content
                         response_container.write(response)
                         
-                        # Add assistant message to chat history
                         st.session_state.messages.append({"role": "assistant", "content": response})
                     except Exception as e:
                         error_msg = f"Error: {str(e)}"
@@ -100,13 +100,8 @@ class StreamlitApp:
         """Run the Streamlit application."""
         st.title(self.title)
         
-        # Set up the sidebar
         self.setup_sidebar()
-        
-        # Display the conversation history
         self.display_messages()
-        
-        # Handle user input
         self.handle_user_input()
 
 
