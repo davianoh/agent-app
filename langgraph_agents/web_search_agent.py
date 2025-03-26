@@ -8,7 +8,6 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langgraph.prebuilt import tools_condition, ToolNode
 
 from dotenv import load_dotenv
-import os
 load_dotenv()
 
 class State(MessagesState):
@@ -27,7 +26,6 @@ class WebSearchAgent:
         self.model_name = model_name
         self.tools = [self.search_web]
         self.llm = ChatGroq(
-                groq_api_key=os.environ['GROQ_API_KEY'], 
                 model_name=self.model_name
         ).bind_tools(self.tools)
         
@@ -64,8 +62,7 @@ class WebSearchAgent:
 
         # Search
         tavily_search = TavilySearchResults(
-            max_results=3, 
-            tavily_api_key=os.environ['TAVILY_API_KEY']
+            max_results=3
         )
 
         search_docs = tavily_search.invoke(query)
@@ -162,5 +159,5 @@ class WebSearchAgent:
 if __name__ == "__main__":
     # Example usage
     agent = WebSearchAgent()
-    result = agent.run("What's the capital of Indonesia?", "1")
+    result = agent.run("What's the latest information about the population in Jakarta?", "1")
     print(result['messages'])

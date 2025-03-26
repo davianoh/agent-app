@@ -135,6 +135,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+gen-lang-client*.json
 
 # Spyder project settings
 .spyderproject

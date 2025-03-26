@@ -4,7 +4,6 @@ from langgraph.graph import StateGraph, START, END, MessagesState
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
-import os
 load_dotenv()
 
 class State(MessagesState):
@@ -22,7 +21,6 @@ class SummarizedMemoryAgent:
 
         self.model_name = model_name
         self.llm = ChatGroq(
-                groq_api_key=os.environ['GROQ_API_KEY'], 
                 model_name=self.model_name
         )
         self.setup_graph()
