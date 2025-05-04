@@ -1,5 +1,5 @@
 # agent-app
-Application using streamlit and langgraph, with groq api. 
+Multi-agents application using langgraph
 
 ![agent search tool](img/agent-search-tool.png)
 
